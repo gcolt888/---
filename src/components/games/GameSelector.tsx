@@ -2,7 +2,7 @@ import React from 'react'
 import { PixelButton } from '../ui/PixelButton'
 
 interface GameSelectorProps {
-  onSelect: (game: 'rock-paper-scissors' | 'whack-a-mole') => void
+  onSelect: (game: 'rock-paper-scissors' | 'whack-a-mole' | 'match-three' | 'snake') => void
   onClose: () => void
 }
 
@@ -27,6 +27,22 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelect, onClose }) => {
             className="text-lg py-3"
           >
             🐭 打地鼠
+          </PixelButton>
+          
+          <PixelButton 
+            onClick={() => onSelect('match-three')}
+            color="bg-purple-400"
+            className="text-lg py-3"
+          >
+            💎 消消乐
+          </PixelButton>
+          
+          <PixelButton 
+            onClick={() => onSelect('snake')}
+            color="bg-orange-400"
+            className="text-lg py-3"
+          >
+            🐍 贪吃蛇
           </PixelButton>
         </div>
         

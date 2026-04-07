@@ -4,6 +4,8 @@ import PixelPet from './components/PixelPet'
 import GameSelector from './components/games/GameSelector'
 import RockPaperScissors from './components/games/RockPaperScissors'
 import WhackAMole from './components/games/WhackAMole'
+import MatchThree from './components/games/MatchThree'
+import Snake from './components/games/Snake'
 import { PixelButton } from './components/ui/PixelButton'
 
 const StatBar: React.FC<{ label: string; value: number; color: string }> = ({
@@ -160,7 +162,7 @@ function App() {
   const [isEditingName, setIsEditingName] = useState(false)
   const [showEvolutionModal, setShowEvolutionModal] = useState(false)
   const [showGameSelector, setShowGameSelector] = useState(false)
-  const [currentGame, setCurrentGame] = useState<'rock-paper-scissors' | 'whack-a-mole' | null>(null)
+  const [currentGame, setCurrentGame] = useState<'rock-paper-scissors' | 'whack-a-mole' | 'match-three' | 'snake' | null>(null)
   const [showFoodSelector, setShowFoodSelector] = useState(false)
   const updateFoodProgress = usePetStore((state) => state.updateFoodProgress)
 
@@ -260,7 +262,7 @@ function App() {
   const handleGameDraw = () => {
   }
 
-  const handleGameSelect = (game: 'rock-paper-scissors' | 'whack-a-mole') => {
+  const handleGameSelect = (game: 'rock-paper-scissors' | 'whack-a-mole' | 'match-three' | 'snake') => {
     setCurrentGame(game)
     setShowGameSelector(false)
   }
@@ -437,6 +439,22 @@ function App() {
 
       {currentGame === 'whack-a-mole' && (
         <WhackAMole 
+          onClose={() => setCurrentGame(null)}
+          onWin={handleGameWin}
+          onLose={handleGameLose}
+        />
+      )}
+
+      {currentGame === 'match-three' && (
+        <MatchThree 
+          onClose={() => setCurrentGame(null)}
+          onWin={handleGameWin}
+          onLose={handleGameLose}
+        />
+      )}
+
+      {currentGame === 'snake' && (
+        <Snake 
           onClose={() => setCurrentGame(null)}
           onWin={handleGameWin}
           onLose={handleGameLose}
