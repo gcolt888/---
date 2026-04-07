@@ -147,7 +147,6 @@ const EvolutionModal: React.FC<{
 function App() {
   const pet = usePetStore((state) => state.pet)
   const choosePet = usePetStore((state) => state.choosePet)
-  const feed = usePetStore((state) => state.feed)
   const play = usePetStore((state) => state.play)
   const clean = usePetStore((state) => state.clean)
   const sleep = usePetStore((state) => state.sleep)
