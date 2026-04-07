@@ -24,13 +24,12 @@ const Snake: React.FC<SnakeProps> = ({ onClose, onWin, onLose }) => {
     { x: 7, y: 9 }
   ])
   const [food, setFood] = useState<Position>({ x: 3, y: 3 })
-  const [direction, setDirection] = useState<Direction>('up')
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
   const [gameWon, setGameWon] = useState(false)
   const [isPaused, setIsPaused] = useState(true)
   const directionRef = useRef<Direction>('up')
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null)
+  const gameLoopRef = useRef<number | null>(null)
 
   const generateFood = useCallback((currentSnake: Position[]) => {
     let newFood: Position
@@ -69,6 +68,8 @@ const Snake: React.FC<SnakeProps> = ({ onClose, onWin, onLose }) => {
         case 'right':
           newHead = { x: head.x + 1, y: head.y }
           break
+        default:
+          newHead = { x: head.x, y: head.y - 1 }
       }
 
       if (checkCollision(newHead, prevSnake)) {
@@ -105,25 +106,21 @@ const Snake: React.FC<SnakeProps> = ({ onClose, onWin, onLose }) => {
       case 'ArrowUp':
         if (currentDir !== 'down') {
           directionRef.current = 'up'
-          setDirection('up')
         }
         break
       case 'ArrowDown':
         if (currentDir !== 'up') {
           directionRef.current = 'down'
-          setDirection('down')
         }
         break
       case 'ArrowLeft':
         if (currentDir !== 'right') {
           directionRef.current = 'left'
-          setDirection('left')
         }
         break
       case 'ArrowRight':
         if (currentDir !== 'left') {
           directionRef.current = 'right'
-          setDirection('right')
         }
         break
     }
@@ -140,7 +137,6 @@ const Snake: React.FC<SnakeProps> = ({ onClose, onWin, onLose }) => {
       (newDir === 'right' && currentDir !== 'left')
     ) {
       directionRef.current = newDir
-      setDirection(newDir)
     }
   }
 
@@ -163,7 +159,6 @@ const Snake: React.FC<SnakeProps> = ({ onClose, onWin, onLose }) => {
     ]
     setSnake(initialSnake)
     setFood(generateFood(initialSnake))
-    setDirection('up')
     directionRef.current = 'up'
     setScore(0)
     setGameOver(false)
