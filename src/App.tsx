@@ -87,14 +87,15 @@ const PetSelector: React.FC<{ onSelect: (species: PetType, name: string) => void
 }
 
 const FoodSelector: React.FC<{
-  onSelect: (food: 'apple' | 'noodle' | 'pudding' | 'cola') => void
+  onSelect: (food: 'apple' | 'noodle' | 'pudding' | 'cola' | 'antibiotic') => void
   onClose: () => void
 }> = ({ onSelect, onClose }) => {
   const foods = [
     { id: 'apple' as const, name: '🍎 苹果', color: 'bg-red-400' },
     { id: 'noodle' as const, name: '🍜 方便面', color: 'bg-yellow-400' },
     { id: 'pudding' as const, name: '🍮 布丁', color: 'bg-orange-400' },
-    { id: 'cola' as const, name: '🥤 可乐', color: 'bg-brown-400' },
+    { id: 'cola' as const, name: '🥤 可乐', color: 'bg-amber-700' },
+    { id: 'antibiotic' as const, name: '💊 抗生素', color: 'bg-green-500' },
   ]
 
   return (
@@ -226,6 +227,10 @@ function App() {
         return '好难过...'
       case 'sleeping':
         return 'zzZ 睡觉中'
+      case 'sick':
+        return '生病了...'
+      case 'poisoned':
+        return '中毒了！'
       default:
         return '嗯~'
     }

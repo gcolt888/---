@@ -7,7 +7,7 @@ interface PixelPetProps {
   stage: PetStage
   action: PetAction
   isDead: boolean
-  food: 'apple' | 'noodle' | 'pudding' | 'cola' | null
+  food: 'apple' | 'noodle' | 'pudding' | 'cola' | 'antibiotic' | null
   foodProgress: number
 }
 
@@ -317,9 +317,9 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
       const eatOffset = action === 'eating' ? (frame % 2 === 0 ? 1 : -1) : 0
 
       const colors = {
-        body: isDead ? '#666666' : speciesData.colors.primary,
-        bodyDark: isDead ? '#444444' : speciesData.colors.accent,
-        bodyLight: isDead ? '#888888' : speciesData.colors.secondary,
+        body: isDead ? '#666666' : (mood === 'poisoned' ? '#9ACD32' : (mood === 'sick' ? '#C0C0C0' : speciesData.colors.primary)),
+        bodyDark: isDead ? '#444444' : (mood === 'poisoned' ? '#6B8E23' : (mood === 'sick' ? '#A9A9A9' : speciesData.colors.accent)),
+        bodyLight: isDead ? '#888888' : (mood === 'poisoned' ? '#ADFF2F' : (mood === 'sick' ? '#D3D3D3' : speciesData.colors.secondary)),
         cheek: isDead ? '#555555' : '#FF6B6B',
         eyeWhite: isDead ? '#999999' : '#FFFFFF',
         eyeBlack: '#222222',
@@ -368,6 +368,20 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
       } else if (mood === 'sleeping' || action === 'sleeping') {
         drawPixel(8 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
         drawPixel(12 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
+      } else if (mood === 'sick' || mood === 'poisoned') {
+        const eyeOffset = frame % 2 === 0 ? 0 : 1
+        drawPixel(8 + offsetX, 9 + offsetY + bounce + eyeOffset, colors.eyeWhite)
+        drawPixel(9 + offsetX, 9 + offsetY + bounce, colors.eyeWhite)
+        drawPixel(12 + offsetX, 9 + offsetY + bounce, colors.eyeWhite)
+        drawPixel(11 + offsetX, 9 + offsetY + bounce + eyeOffset, colors.eyeWhite)
+        
+        if (mood === 'sick') {
+          drawPixel(8 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
+          drawPixel(11 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
+        } else {
+          drawPixel(9 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
+          drawPixel(12 + offsetX, 10 + offsetY + bounce, colors.eyeBlack)
+        }
       } else {
         drawPixel(8 + offsetX, 9 + offsetY + bounce, colors.eyeWhite)
         drawPixel(9 + offsetX, 9 + offsetY + bounce, colors.eyeWhite)
@@ -392,6 +406,16 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
           drawPixel(9 + offsetX, 13 + offsetY + bounce, colors.mouth)
           drawPixel(10 + offsetX, 12 + offsetY + bounce, colors.mouth)
           drawPixel(11 + offsetX, 13 + offsetY + bounce, colors.mouth)
+        } else if (mood === 'sick') {
+          drawPixel(10 + offsetX, 13 + offsetY + bounce, colors.mouth)
+          if (frame % 2 === 0) {
+            drawPixel(9 + offsetX, 12 + offsetY + bounce, colors.mouth)
+            drawPixel(11 + offsetX, 12 + offsetY + bounce, colors.mouth)
+          }
+        } else if (mood === 'poisoned') {
+          drawPixel(9 + offsetX, 12 + offsetY + bounce, colors.mouth)
+          drawPixel(10 + offsetX, 13 + offsetY + bounce, colors.mouth)
+          drawPixel(11 + offsetX, 12 + offsetY + bounce, colors.mouth)
         } else if (action === 'eating') {
           drawPixel(10 + offsetX, 12 + offsetY + bounce, colors.mouth)
           drawPixel(10 + offsetX, 13 + offsetY + bounce, colors.mouth)
@@ -431,6 +455,27 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
         if (frame % 2 === 0) {
           drawPixel(5 + offsetX, 11 + offsetY + bounce, '#FFD700')
           drawPixel(15 + offsetX, 11 + offsetY + bounce, '#FFD700')
+        }
+      }
+
+      if (mood === 'sick' && !isDead) {
+        const sweatOffset = frame % 2 === 0 ? 0 : 1
+        drawPixel(5 + offsetX, 8 + offsetY + bounce - sweatOffset, '#87CEEB')
+        drawPixel(15 + offsetX, 8 + offsetY + bounce - sweatOffset, '#87CEEB')
+        if (frame % 4 === 0) {
+          drawPixel(6 + offsetX, 7 + offsetY + bounce, '#87CEEB')
+          drawPixel(14 + offsetX, 7 + offsetY + bounce, '#87CEEB')
+        }
+      }
+
+      if (mood === 'poisoned' && !isDead) {
+        const bubbleOffset = frame % 3
+        drawPixel(6 + offsetX, 5 + offsetY + bounce - bubbleOffset, '#ADFF2F')
+        drawPixel(14 + offsetX, 5 + offsetY + bounce - bubbleOffset, '#ADFF2F')
+        drawPixel(10 + offsetX, 4 + offsetY + bounce - bubbleOffset, '#9ACD32')
+        if (frame % 2 === 0) {
+          drawPixel(7 + offsetX, 3 + offsetY + bounce, '#6B8E23')
+          drawPixel(13 + offsetX, 3 + offsetY + bounce, '#6B8E23')
         }
       }
 
@@ -476,6 +521,13 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
             [0, 2], [1, 2], [2, 2],
             [0, 3], [1, 3], [2, 3],
           ],
+          antibiotic: [
+            [1, 0],
+            [0, 1], [1, 1], [2, 1],
+            [0, 2], [1, 2], [2, 2],
+            [0, 3], [1, 3], [2, 3],
+            [1, 4],
+          ],
         }
         
         const foodColors = {
@@ -483,6 +535,7 @@ const PixelPet: React.FC<PixelPetProps> = ({ species, mood, stage, action, isDea
           noodle: '#FFFF00',
           pudding: '#FFD700',
           cola: '#8B4513',
+          antibiotic: '#32CD32',
         }
         
         const pixels = foodPixels[food]

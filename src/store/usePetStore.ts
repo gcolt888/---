@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type PetType = 'fire' | 'water' | 'grass' | 'electric'
 export type PetStage = 'baby' | 'teen' | 'adult'
-export type PetMood = 'happy' | 'normal' | 'sad' | 'sleeping' | 'eating' | 'thinking'
+export type PetMood = 'happy' | 'normal' | 'sad' | 'sleeping' | 'eating' | 'thinking' | 'sick' | 'poisoned'
 export type PetAction = 'idle' | 'eating' | 'playing' | 'sleeping' | 'cleaning'
 
 export interface PetSpecies {
@@ -103,8 +103,9 @@ export interface Pet {
   createdAt: number
   lastUpdated: number
   hasChosenPet: boolean
-  food: 'apple' | 'noodle' | 'pudding' | 'cola' | null
+  food: 'apple' | 'noodle' | 'pudding' | 'cola' | 'antibiotic' | null
   foodProgress: number
+  healthZeroAt: number | null
 }
 
 interface PetStore {
@@ -120,7 +121,7 @@ interface PetStore {
   evolve: () => void
   decayStats: () => void
   setAction: (action: PetAction) => void
-  feedWithFood: (food: 'apple' | 'noodle' | 'pudding' | 'cola') => void
+  feedWithFood: (food: 'apple' | 'noodle' | 'pudding' | 'cola' | 'antibiotic') => void
   updateFoodProgress: (progress: number) => void
 }
 
@@ -155,6 +156,7 @@ export const createInitialPet = (): Pet => ({
   hasChosenPet: false,
   food: null,
   foodProgress: 0,
+  healthZeroAt: null,
 })
 
 export const usePetStore = create<PetStore>()(
@@ -294,39 +296,102 @@ export const usePetStore = create<PetStore>()(
         set({ pet: { ...pet, action, lastUpdated: Date.now() } })
       },
 
-      feedWithFood: (food: 'apple' | 'noodle' | 'pudding' | 'cola') => {
+      feedWithFood: (food: 'apple' | 'noodle' | 'pudding' | 'cola' | 'antibiotic') => {
         const { pet } = get()
         if (pet.isDead || pet.mood === 'sleeping') return
-        const newHunger = Math.min(100, pet.hunger + 25)
-        const newExperience = Math.min(pet.experienceToEvolve, pet.experience + 5)
-        const newMood = pet.hunger < 30 ? 'happy' : pet.mood
-        set({
-          pet: {
-            ...pet,
-            hunger: newHunger,
-            experience: newExperience,
-            mood: newMood,
-            action: 'eating',
-            food,
-            foodProgress: 0,
-            lastUpdated: Date.now(),
-          },
-        })
         
-        setTimeout(() => {
-          const currentPet = get().pet
-          if (currentPet.action === 'eating') {
+        if (food === 'antibiotic') {
+          if (pet.health <= 0) {
+            const newHealth = 50
             set({
               pet: {
-                ...currentPet,
+                ...pet,
+                health: newHealth,
+                mood: 'normal',
                 action: 'idle',
-                food: null,
+                food: 'antibiotic',
                 foodProgress: 0,
+                healthZeroAt: null,
                 lastUpdated: Date.now(),
               },
             })
+            
+            setTimeout(() => {
+              const currentPet = get().pet
+              if (currentPet.action === 'idle' || currentPet.food === 'antibiotic') {
+                set({
+                  pet: {
+                    ...currentPet,
+                    food: null,
+                    foodProgress: 0,
+                    lastUpdated: Date.now(),
+                  },
+                })
+              }
+            }, 2000)
+          } else {
+            const newHealth = Math.max(0, pet.health - 2)
+            const isDead = newHealth <= 0
+            set({
+              pet: {
+                ...pet,
+                health: newHealth,
+                mood: 'poisoned',
+                action: 'idle',
+                food: 'antibiotic',
+                foodProgress: 0,
+                isDead,
+                lastUpdated: Date.now(),
+              },
+            })
+            
+            setTimeout(() => {
+              const currentPet = get().pet
+              if (!currentPet.isDead && (currentPet.mood === 'poisoned' || currentPet.food === 'antibiotic')) {
+                set({
+                  pet: {
+                    ...currentPet,
+                    mood: 'normal',
+                    food: null,
+                    foodProgress: 0,
+                    lastUpdated: Date.now(),
+                  },
+                })
+              }
+            }, 2000)
           }
-        }, 2000)
+        } else {
+          const newHunger = Math.min(100, pet.hunger + 25)
+          const newExperience = Math.min(pet.experienceToEvolve, pet.experience + 5)
+          const newMood = pet.hunger < 30 ? 'happy' : pet.mood
+          set({
+            pet: {
+              ...pet,
+              hunger: newHunger,
+              experience: newExperience,
+              mood: newMood,
+              action: 'eating',
+              food,
+              foodProgress: 0,
+              lastUpdated: Date.now(),
+            },
+          })
+          
+          setTimeout(() => {
+            const currentPet = get().pet
+            if (currentPet.action === 'eating') {
+              set({
+                pet: {
+                  ...currentPet,
+                  action: 'idle',
+                  food: null,
+                  foodProgress: 0,
+                  lastUpdated: Date.now(),
+                },
+              })
+            }
+          }, 2000)
+        }
       },
 
       updateFoodProgress: (progress: number) => {
@@ -359,20 +424,47 @@ export const usePetStore = create<PetStore>()(
         }
 
         let newHealth = pet.health
+        let newHealthZeroAt = pet.healthZeroAt
+        
         if (newHunger < 20 || newCleanliness < 20 || newHappiness < 20) {
           newHealth = Math.max(0, pet.health - timeDiff * 0.5)
-        } else if (newHealth < 100) {
+        } else if (newHealth < 100 && pet.mood !== 'sick' && pet.mood !== 'poisoned') {
           newHealth = Math.min(100, pet.health + timeDiff * 0.2)
+        }
+
+        if (newHealth <= 0) {
+          if (!pet.healthZeroAt) {
+            newHealthZeroAt = now
+          }
+        } else {
+          newHealthZeroAt = null
         }
 
         let newMood = pet.mood
         let newAction = pet.action
         let newFood = pet.food
         let newFoodProgress = pet.foodProgress
-        if (newMood !== 'sleeping') {
-          if (newHappiness > 60 && newHunger > 40) newMood = 'happy'
-          else if (newHappiness < 30 || newHunger < 30) newMood = 'sad'
-          else newMood = 'normal'
+        let isDead = false
+
+        if (newHealth <= 0 && pet.healthZeroAt) {
+          const timeHealthZero = now - pet.healthZeroAt
+          const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000
+          if (timeHealthZero >= sevenDaysInMs) {
+            isDead = true
+          }
+        }
+
+        if (!isDead && newMood !== 'sleeping' && newMood !== 'sick' && newMood !== 'poisoned') {
+          if (newHealth <= 0) {
+            newMood = 'sick'
+          } else if (newHappiness > 60 && newHunger > 40) {
+            newMood = 'happy'
+          } else if (newHappiness < 30 || newHunger < 30) {
+            newMood = 'sad'
+          } else {
+            newMood = 'normal'
+          }
+          
           if (newAction !== 'idle' && timeDiff > 3) {
             newAction = 'idle'
             newFood = null
@@ -381,7 +473,6 @@ export const usePetStore = create<PetStore>()(
         }
 
         const newAge = pet.age + timeDiff
-        const isDead = newHealth <= 0
 
         set({
           pet: {
@@ -396,6 +487,7 @@ export const usePetStore = create<PetStore>()(
             action: newAction,
             food: newFood,
             foodProgress: newFoodProgress,
+            healthZeroAt: newHealthZeroAt,
             isDead,
             lastUpdated: now,
           },
