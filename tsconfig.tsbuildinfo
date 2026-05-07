@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/pixelpet.tsx","./src/components/games/gameselector.tsx","./src/components/games/rockpaperscissors.tsx","./src/components/games/whackamole.tsx","./src/components/ui/pixelbutton.tsx","./src/store/usepetstore.ts"],"version":"5.9.3"}
