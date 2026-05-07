@@ -117,6 +117,7 @@ interface PetStore {
   sleep: () => void
   wakeUp: () => void
   resetPet: () => void
+  abandonPet: () => void
   setName: (name: string) => void
   evolve: () => void
   decayStats: () => void
@@ -269,6 +270,17 @@ export const usePetStore = create<PetStore>()(
 
       resetPet: () => {
         set({ pet: { ...createInitialPet(), createdAt: Date.now(), lastUpdated: Date.now() } })
+      },
+
+      abandonPet: () => {
+        set({
+          pet: {
+            ...createInitialPet(),
+            createdAt: Date.now(),
+            lastUpdated: Date.now(),
+            hasChosenPet: false,
+          },
+        })
       },
 
       setName: (name: string) => {

@@ -155,6 +155,7 @@ function App() {
   const sleep = usePetStore((state) => state.sleep)
   const wakeUp = usePetStore((state) => state.wakeUp)
   const resetPet = usePetStore((state) => state.resetPet)
+  const abandonPet = usePetStore((state) => state.abandonPet)
   const setName = usePetStore((state) => state.setName)
   const evolve = usePetStore((state) => state.evolve)
   const decayStats = usePetStore((state) => state.decayStats)
@@ -163,6 +164,7 @@ function App() {
   const [isEditingName, setIsEditingName] = useState(false)
   const [showEvolutionModal, setShowEvolutionModal] = useState(false)
   const [showGameSelector, setShowGameSelector] = useState(false)
+  const [showAbandonConfirm, setShowAbandonConfirm] = useState(false)
   const [currentGame, setCurrentGame] = useState<'rock-paper-scissors' | 'whack-a-mole' | 'match-three' | 'snake' | null>(null)
   const [showFoodSelector, setShowFoodSelector] = useState(false)
   const updateFoodProgress = usePetStore((state) => state.updateFoodProgress)
@@ -318,6 +320,12 @@ function App() {
                 {getStageText()}
               </span>
             </div>
+            <button
+              onClick={() => setShowAbandonConfirm(true)}
+              className="text-xs text-gray-400 hover:text-red-400 mt-2 transition-colors"
+            >
+              遗弃宠物 · 重新选择
+            </button>
           </div>
 
           <div className="bg-white border-4 border-gray-800 rounded-lg p-0 mb-4 min-h-[320px] w-full h-[320px] flex flex-col justify-center relative">
@@ -424,6 +432,23 @@ function App() {
           currentName={pet.name}
           nextName={getNextEvolutionName()}
         />
+      )}
+
+      {showAbandonConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white border-4 border-gray-800 rounded-lg p-6 max-w-xs mx-4 text-center">
+            <p className="text-gray-800 font-bold mb-2">遗弃 {pet.name}？</p>
+            <p className="text-sm text-gray-500 mb-4">宠物会离开，你可以重新选择</p>
+            <div className="flex gap-3 justify-center">
+              <PixelButton onClick={() => { abandonPet(); setShowAbandonConfirm(false); }} color="bg-red-400">
+                确认遗弃
+              </PixelButton>
+              <PixelButton onClick={() => setShowAbandonConfirm(false)} color="bg-gray-400">
+                取消
+              </PixelButton>
+            </div>
+          </div>
+        </div>
       )}
 
       {showGameSelector && (
