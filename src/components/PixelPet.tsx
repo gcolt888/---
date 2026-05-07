@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
-import type { PetType, PetStage, PetMood, PetAction } from '../store/usePetStore'
+import type { PetStage, PetMood, PetAction } from '../store/usePetStore'
 import { getSpriteForState, getTotalFrames, type SpriteDef } from './spriteConfig'
 
 interface PixelPetProps {
-  species: PetType
   mood: PetMood
   stage: PetStage
   action: PetAction
@@ -26,7 +25,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 export default function PixelPet({
-  species: _species,
   mood,
   stage: _stage,
   action,

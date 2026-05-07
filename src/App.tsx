@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { usePetStore, PET_SPECIES, PetType } from './store/usePetStore'
+import { usePetStore } from './store/usePetStore'
 import PixelPet from './components/PixelPet'
 import GameSelector from './components/games/GameSelector'
 import RockPaperScissors from './components/games/RockPaperScissors'
@@ -27,36 +27,17 @@ const StatBar: React.FC<{ label: string; value: number; color: string }> = ({
   </div>
 )
 
-const PetSelector: React.FC<{ onSelect: (species: PetType, name: string) => void }> = ({
-  onSelect,
-}) => {
-  const [selectedSpecies, setSelectedSpecies] = useState<PetType>('fire')
+const PetSelector: React.FC<{ onSelect: (name: string) => void }> = ({ onSelect }) => {
   const [petName, setPetName] = useState('')
-
-  const speciesData = PET_SPECIES.find((s) => s.id === selectedSpecies)!
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-400 to-indigo-500 flex items-center justify-center p-4">
       <div className="crt-filter w-full max-w-lg">
         <div className="bg-gray-100 border-8 border-gray-800 rounded-lg p-6 shadow-2xl">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">✨ 选择你的宠物 ✨</h1>
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">✨ 领养你的小熊猫 ✨</h1>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {PET_SPECIES.map((species) => (
-              <button
-                key={species.id}
-                onClick={() => setSelectedSpecies(species.id)}
-                className={`p-4 border-4 rounded-lg transition-all cursor-pointer
-                  ${selectedSpecies === species.id ? 'border-yellow-500 bg-yellow-100' : 'border-gray-400 bg-white hover:border-gray-600'}`}
-              >
-                <div
-                  className="w-8 h-8 mx-auto mb-2 rounded-full"
-                  style={{ backgroundColor: species.colors.primary }}
-                />
-                <p className="font-bold text-gray-800">{species.name}</p>
-                <p className="text-xs text-gray-500">{species.description}</p>
-              </button>
-            ))}
+          <div className="flex justify-center mb-6">
+            <div className="text-8xl">🐾</div>
           </div>
 
           <div className="mb-6">
@@ -65,7 +46,7 @@ const PetSelector: React.FC<{ onSelect: (species: PetType, name: string) => void
               type="text"
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
-              placeholder={speciesData.evolutionNames.baby}
+              placeholder="小熊猫"
               className="w-full px-4 py-2 border-4 border-gray-800 text-center font-bold text-lg"
               maxLength={10}
             />
@@ -73,7 +54,7 @@ const PetSelector: React.FC<{ onSelect: (species: PetType, name: string) => void
 
           <div className="text-center">
             <PixelButton
-              onClick={() => onSelect(selectedSpecies, petName || speciesData.evolutionNames.baby)}
+              onClick={() => onSelect(petName || '小熊猫')}
               color="bg-green-400"
               className="text-xl px-8 py-3"
             >
@@ -197,8 +178,6 @@ function App() {
     }
   }, [pet.action, pet.food, updateFoodProgress])
 
-  const speciesData = PET_SPECIES.find((s) => s.id === pet.species)!
-
   useEffect(() => {
     const interval = setInterval(() => {
       decayStats()
@@ -253,9 +232,9 @@ function App() {
     return <PetSelector onSelect={choosePet} />
   }
 
-  const getNextEvolutionName = () => {
-    if (pet.stage === 'baby') return speciesData.evolutionNames.teen
-    if (pet.stage === 'teen') return speciesData.evolutionNames.adult
+  const getNextStageName = () => {
+    if (pet.stage === 'baby') return '成长期'
+    if (pet.stage === 'teen') return '成熟期'
     return ''
   }
 
@@ -316,7 +295,7 @@ function App() {
             <p className="text-sm text-gray-600 mt-1">{getMoodText()}</p>
             <div className="flex justify-center gap-4 mt-1">
               <span className="text-xs text-gray-500">年龄: {formatAge(pet.age)}</span>
-              <span className="text-xs font-bold" style={{ color: speciesData.colors.primary }}>
+              <span className="text-xs font-bold text-orange-500">
                 {getStageText()}
               </span>
             </div>
@@ -331,7 +310,6 @@ function App() {
           <div className="bg-white border-4 border-gray-800 rounded-lg p-0 mb-4 min-h-[320px] w-full h-[320px] flex flex-col justify-center relative">
             <div className="w-full h-full flex items-center justify-center">
               <PixelPet
-                species={pet.species}
                 mood={pet.mood}
                 stage={pet.stage}
                 action={pet.action}
@@ -430,7 +408,7 @@ function App() {
           }}
           onCancel={() => setShowEvolutionModal(false)}
           currentName={pet.name}
-          nextName={getNextEvolutionName()}
+          nextName={getNextStageName()}
         />
       )}
 

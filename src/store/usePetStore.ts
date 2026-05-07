@@ -1,92 +1,11 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-export type PetType = 'fire' | 'water' | 'grass' | 'electric'
 export type PetStage = 'baby' | 'teen' | 'adult'
 export type PetMood = 'happy' | 'normal' | 'sad' | 'sleeping' | 'eating' | 'thinking' | 'sick' | 'poisoned'
 export type PetAction = 'idle' | 'eating' | 'playing' | 'sleeping' | 'cleaning'
 
-export interface PetSpecies {
-  id: PetType
-  name: string
-  description: string
-  colors: {
-    primary: string
-    secondary: string
-    accent: string
-  }
-  evolutionNames: {
-    baby: string
-    teen: string
-    adult: string
-  }
-}
-
-export const PET_SPECIES: PetSpecies[] = [
-  {
-    id: 'fire',
-    name: '火焰系',
-    description: '活泼好动的火系宠物',
-    colors: {
-      primary: '#FF6B35',
-      secondary: '#FFB08A',
-      accent: '#FF4500',
-    },
-    evolutionNames: {
-      baby: '小火苗',
-      teen: '烈焰兽',
-      adult: '炎龙王',
-    },
-  },
-  {
-    id: 'water',
-    name: '水系',
-    description: '温柔可爱的水系宠物',
-    colors: {
-      primary: '#4ECDC4',
-      secondary: '#A8E6CF',
-      accent: '#00BFFF',
-    },
-    evolutionNames: {
-      baby: '小水滴',
-      teen: '浪花兽',
-      adult: '海神王',
-    },
-  },
-  {
-    id: 'grass',
-    name: '草系',
-    description: '自然清新的草系宠物',
-    colors: {
-      primary: '#95E1A3',
-      secondary: '#C8F7C5',
-      accent: '#32CD32',
-    },
-    evolutionNames: {
-      baby: '小芽苗',
-      teen: '森林兽',
-      adult: '树精王',
-    },
-  },
-  {
-    id: 'electric',
-    name: '电系',
-    description: '活力四射的电系宠物',
-    colors: {
-      primary: '#FFE066',
-      secondary: '#FFF59D',
-      accent: '#FFD700',
-    },
-    evolutionNames: {
-      baby: '小电球',
-      teen: '闪电兽',
-      adult: '雷神王',
-    },
-  },
-]
-
 export interface Pet {
-  species: PetType
   name: string
   stage: PetStage
   mood: PetMood
@@ -110,7 +29,7 @@ export interface Pet {
 
 interface PetStore {
   pet: Pet
-  choosePet: (species: PetType, name: string) => void
+  choosePet: (name: string) => void
   feed: () => void
   play: () => void
   clean: () => void
@@ -138,8 +57,7 @@ const getExpToEvolve = (stage: PetStage): number => {
 }
 
 export const createInitialPet = (): Pet => ({
-  species: 'fire',
-  name: '小宝贝',
+  name: '小熊猫',
   stage: 'baby',
   mood: 'normal',
   action: 'idle',
@@ -165,12 +83,10 @@ export const usePetStore = create<PetStore>()(
     (set, get) => ({
       pet: createInitialPet(),
       
-      choosePet: (species: PetType, name: string) => {
-        const speciesData = PET_SPECIES.find((s) => s.id === species)!
+      choosePet: (name: string) => {
         const newPet: Pet = {
           ...createInitialPet(),
-          species,
-          name: name || speciesData.evolutionNames.baby,
+          name: name || '小熊猫',
           hasChosenPet: true,
           createdAt: Date.now(),
           lastUpdated: Date.now(),
